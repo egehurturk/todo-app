@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}To-Do List{% endblock %}
+
+{% block content %}
+<br/>
+<style>
+	.round10{
+		border-radius: 10px;
+		background-color: #EFF5F9;
+		box-shadow: 0px 10px 20px 2px #000000;
+
+	}
+
+	#empty-message{
+		font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+	}
+</style>
+<div class="row">
+	<div class="mx-auto w-75 p-5 bg-dark text-white text-center round10">
+		{% if messages %}
+			{% for message in messages %}
+				<div class="alert alert-warning alert-dismissable" role="alert">
+					<button class="close" data-dismiss="alert">
+						<sup>&times;</sup>
+					</button>
+					{{ message }}
+				</div>
+			{% endfor%}
+		{% endif %}
+
+		{% if all_items %}
+			<h1 class="text-left">
+				To-Do
+			</h1>
+			<table class="table table-hover table-dark">
+			  <tbody>
+			  	{% for things in all_items %}
+				  	{% if things.completed %}
+						<tr>
+							<th scope="row">
+				      			<center><a class="text-muted" href="{% url 'uncross' things.id %}"><i class="far fa-check-square"></i></a></center>
+				      		</th>
+							<td class="text-muted striker text-left js-edit" data-id="{{ things.id }}"><a class="text-muted" href="#">{{ things.item }}</a></td>
+							<td><center><a class="text-danger" href="{% url 'delete' things.id %}"><i class="fas fa-trash-alt"></i></a></center></td>
+						</tr>
+					{% else %}
+						<tr>
+							<th scope="row">
+				      			<center><a class="text-success" href="{% url 'cross_off' things.id %}"><i class="far fa-square"></i></a></center>
+				      		</th>
+							<td class="text-left js-edit" data-id="{{ things.id }}"><a class="text-white" href="#">{{ things.item }}</a></td>
+							<td><center><a class="text-danger" href="{% url 'delete' things.id %}"><i class="fas fa-trash-alt"></i></a></center></td>
+						</tr>
+					{% endif %}
+				{% endfor %}
+			  </tbody>
+			</table>
+		{% else %}
+			<h2 class="text-center" id="empty-message">
+				You don't have any task to do. Enjoy your time or add a To-Do!
+			</h2>
+			<img src="{% static 'images/ege1.png'%}">
+			<br/>
+			<br/>
+			<a href="#"><i class="fas fa-plus-circle fa-3x float-center text-success" data-toggle="modal" data-target="#exampleModal"></i></a>
+
+		{% endif %}
+
+		{% if all_items %}
+			<br/>
+			<br/>
+			<div>
+				<a href="#"><i class="fas fa-plus-circle fa-2x float-left text-success" data-toggle="modal" data-target="#exampleModal"></i></a>
+			</div>
+		{% endif %}
+	</div>
+</div>
+
+<!-- ADD A TO-DO MODAL -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add a To-Do:</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+
+				<form class="form-inline my-2 my-lg-0" method="POST">
+					{% csrf_token %}
+					<input class="form-control mr-sm-2" type="search" placeholder="{{ item.item }}" value="{{ item.item }}" aria-label="Search" name="item">
+					<button class="btn btn-info my-2 my-sm-0" type="submit">Save your To-Do!</button>
+					<input type="hidden" value="{{ item.completed }}" name="completed">
+				</form>
+
+				<img src="{% static 'images/undraw_add_content_d1tf.png'%}">
+		
+			
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- EDIT A TO-DO MODAL -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edit a To-Do:</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+
+				<form action="" class="form-inline my-2 my-lg-0" method="POST" id="editForm">
+					{% csrf_token %}
+					<input class="form-control mr-sm-2" type="search" placeholder="" value="" id="editTodoItem" aria-label="Search" name="item">
+					<button class="btn btn-info my-2 my-sm-0" type="submit">Edit your To-Do!</button>
+					<input type="hidden" value="" name="edit">
+					<input type="hidden" name="editTodoId" value="" id="editTodoId">
+				</form>
+
+		
+			
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('.js-edit').on('click', function(ev) {
+			var targetId=$(this).data("id");
+			var targetTodo=$("a", this).text();
+			$("#editTodoItem").val(targetTodo);
+			$("#ditTodoId").val(targetId);
+			$("#editForm").attr("action", "/edit/"+targetId);
+			$('#editModal').modal('show');
+			return false;
+		})
+	});
+
+
+</script>
+
+
+
+{% endblock %}
